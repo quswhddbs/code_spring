@@ -1,0 +1,762 @@
+
+
+***************************** 개발환경설정 *****************************
+
+- 7zip 다운로드 
+https://www.7-zip.org/ ( 알집은 경로가 길면 zip 파일 플다가 오류난다. )
+
+- STS 다운 버전 (STS 3.9.9.RELEASE) 다운로드 , 윈도우 ver
+https://spring.io/tools3/sts/legacy
+\sts-3.9.9.RELEASE\STS.exe -> 실행
+* STS4 버전부터는 mvn package 를 market place.. 다운받아야 한다.
+
+- 이클립스 java was started but returned exit code=13 해결 방법
+이클립스가 설치 된 경로에 eclipse.ini파일이 있습니다. 
+eclipse.ini 실행시킵니다. -> --launcher.appendVmargs 와 -vmargs 사이에 아래의 코드를 입력한다.
+==============================================
+-vm
+C:\Program Files\Java\jdk1.8.0_121\bin\javaw.exe
+==============================================
+
+- 프로젝트 생성
+File - new - spring lefacy project 선택 - Spring MVC 프로젝트 선택
+프로젝트 이름은 'ex00' 을 사용하고 , 패키지 이름은 'org.zerock.web' 로 한다.
+
+- 라이브러리의 초기화
+폴더옵션에서 숨김파일을 볼수 있게 설정 후 , 사용자 및에 m2 파일을 볼수 있다.
+(메이븐의 레파지토리 폴더) C:\Users\whddb\.m2\repository
+
+- 프로젝트 실행 점검
+프로젝트 우클릭 후 Rus as - Run On Server 선택을 해서 
+Hello world! 와 같이 프로젝트 실행이 되는지 확인 한다.
+* STS4 에서는 기본으로 제공되는 server 가 없다.
+
+- jdk 버전의 처리
+프로젝트 우클릭 후 project facets 에서 자바의 버전을 변경 , 
+java Compiler 의 메뉴에서도 자바의 버전을 변경 한다.
+* 교제는 jdk1.8을 기준으로 한다.
+project Facets , Java Compiler 에서 변경
+
+- project 를 UTF-8 로 변경한다.
+
+- 프로젝트 템플릿의 구조
+src/main/java : 개발되는 java의 코드경로
+src/main/resources : 서버가 실행될 때 필요한 파일들의 경로
+src/test/java : 테스트 전용 경로 
+src/test/resources : 테스트 시에만 사용되는 파일들 경로
+\src\main\webapp\WEB-INF\views : jsp 파일의 경로
+\src\main\webapp\WEB-INF\spring : 스프링관련 모든 중요 설정들어가는 곳
+
+- spring 프레임워크의 버전 변경
+pom.xml 파일 수정 : 
+<java-version>1.8</java-version>
+<org.springframework-version>4.1.7.RELEASE</org.springframework-version>
+위와같이 수정을 하면 maven 은 새로운 라이브러리를 다운 받는다. Maven Dependencies 에서
+스프링 버전이 다운 받아졌는지 확인한다.
+
+- tomcat 9 설치 및 사용
+http://tomcat.apache.org/ 에서 다운 후 
+sever 에서 Apache Tomcat 을 추가 한다. preferences 에서 server - add 해준 후
+프로젝트 우클릭 후 Rus as - Run On Server 선택을 해서 Manually define a new server 선택 후
+Tomcat 9 선택 후 실행하면 시작 되는것을 확인할수 있다. (기존의 스프링 기본서버는 stop 한다.)
+예제의 경우 페키지의 경로가 'org.zerock.web' 이기 때문에 브라우저상의 경로는 'http://localhost:8080/web/' 된다.
+
+ -  server.xml 의 get 방식을 utf 로 수정
+<Connector connectionTimeout="20000" port="8080" protocol="HTTP/1.1" redirectPort="8443" 
+    URIEncoding="UTF-8" />
+
+
+***************************** mysql 설치 *****************************
+
+- google 에서 다운로드 보고 설치
+
+- pom에 추가 mysql jdbc
+<dependency>
+			<groupId>mysql</groupId>
+			<artifactId>mysql-connector-java</artifactId>
+			<version>5.1.36</version>
+		</dependency>
+		
+- 버전변경
+<!-- Test -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency> 		
+
+\ex00\src\test\java\org\zerock\web\MySQLConnectionTest.java
+로 커넥션 테스트한다. (junit test 실행)
+
+
+************* 스피링 + 마이바티스 + mysql 의 설정 *************
+
+		<!-- MyBatis 라이브러리 -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis</artifactId>
+			<version>3.4.1</version>
+		</dependency>
+		<!-- 마이바티스와 스프링 연동을 위한 라이브러리 -->
+		<dependency>
+			<groupId>org.mybatis</groupId>
+			<artifactId>mybatis-spring</artifactId>
+			<version>1.3.0</version>
+		</dependency>
+		<!-- 스프링에서 JDBC 를 사용하기 위한 라이브러리 입니다. -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-jdbc</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		<!-- 스프링 TEST 위한 라이브러리 -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-test</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		
+- Spring project 에서 root-context.xml 파일 수정 (root-context1.xml)
+
+\src\main\webapp\WEB-INF\spring\root-context.xml : 파일수정 , namespaces 클릭 후 
+aop , beans , context , jdbc , mybatis 클릭 후 저장하면 root-context.xml 의 내용이 자동으로 추가된다.
+
+- DataSource 설정
+root-context.xml 파일에 아래와 같이 추가한다. (root-context.xml 에서 beans 사이에 추가해 주면 된다.)
+
+	<bean id="dataSource" class="org.springframework.jdbc.datasource.DriverManagerDataSource">
+		<property name="driverClassName" value="com.mysql.cj.jdbc.Driver"></property>
+		<property name="url" value="jdbc:mysql://127.0.0.1:3306/book_ex?serverTimezone=UTC"></property>
+		<property name="username" value="zerock"></property>
+		<property name="password" value="zerock"></property>
+	</bean>
+	
+	<bean id="sqlSessionFactory"
+		class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+ - DataSource 테스트 해보기 
+
+ \src\test\java\org\zerock\persistence\DataSourceTests.java : 파일만들어서 확인해 보기 ( 우클릭 Run as - junit Test 로 실행 )
+
+
+ - mybatis-config.xml 파일 추가하기 
+
+ - MyBatis 연결 테스트
+ 
+ - root-context.xml 에 내용추가 (root-context2.xml)
+
+ <bean id="sqlSessionFactory" 
+      class="org.mybatis.spring.SqlSessionFactoryBean">
+ 	<property name="dataSource" ref="dataSource" />
+	<property name="configLocation" 
+				value="classpath:/mybatis-config.xml"></property>
+	</bean>  
+ 
+ ex00\src\test\java\org\zerock\web\MyBatisTest.java  : 파일만들어서 확인해 보기 ( 우클릭 Run as - junit Test 로 실행 )
+
+  
+******************** 기본적인 void 리턴 타입 (기초적인 컨트롤러 생성 실습)
+
+서버가 실행이 안될때가 있다. 그럴때는 
+프로젝트 우클릭 -> properties -> Deployment Asse.. -> Add -> java build Path Entries -> Maven Dependencies 추가
+
+- servlet-context.xml 주요부분
+ MVC 컨트롤러 실행에 있어 가장 중요한 정보가 담겨 있다. MVC 설정만을 분리하기 위해 만들어진 파일이다.
+ 파일내에 <context:component-scan base-package="org.zerock.controller" /> 이부분은 컨트롤러에서 자동인식 되도록 설정하는 부분이다.
+
+ex00\src\main\webapp\WEB-INF\spring\appServlet\servlet-context.xml 파일에 자동으로 jsp 위치와 jsp 파일로 연결되도록 설정되 있다.
+
+@Controller : 컨트롤러 객체임을 선언하는 애노테이션 
+ex00\src\main\java\org\zerock\web\SampleController.java
+
+******************** 기본적인 String 리턴 타입 (기초적인 컨트롤러 생성 실습)
+
+http://localhost:8080/web/doC?msg=jyp
+ex00\src\main\java\org\zerock\web\SampleController2.java
+
+******************** 기본적인 String 리턴 타입 (VO값 전달)
+
+http://localhost:8080/web/doD
+ex00\src\main\java\org\zerock\web\SampleController3.java
+
+******************** 기본적인 redirect , forward 기능
+
+http://localhost:8080/web/doE
+ex00\src\main\java\org\zerock\web\SampleController4.java
+
+******************** 기본적인 JSON 기능
+
+- JSON 데이터를 생성하는 경우
+		 pom.xml 에 내용 추가  
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.8.4</version>
+		</dependency>
+
+http://localhost:8080/web/doJSON
+ex00\src\main\java\org\zerock\web\SampleController5.java
+
+----------- 테이블 생성 및 개발 준비 ----------- 기본적인 흐름에 대한 이해
+
+create table tbl_member ( 
+userid varchar(50) not null,
+userpw varchar(50) not null,
+username varchar(50) not null,
+email varchar(100) not null,
+regdate timestamp default now(),
+updatedate timestamp default now(),
+primary key(userid)
+);
+
+도메인 객체를 위한 클래스설계 (VO)
+
+src\main\java\org\zerock\domain\MemberVO.java
+ex00\src\main\java\org\zerock\persistence\MemberDAO.java
+ex00\src\main\resources\mappers\memberMapper.xml
+
+root-context.xml 에서 Mapper 인식 (root-context3.xml)
+
+<property name="mapperLocations" 
+value="classpath:mappers/**/*Mapper.xml"></property>
+
+마이바티스와 스프링 연결을 도와주는 session 추가 (root-context3.xml)
+
+<bean id="sqlSession" class="org.mybatis.spring.SqlSessionTemplate" 
+   destroy-method="clearCache">
+  <constructor-arg name="sqlSessionFactory" 
+    ref="sqlSessionFactory"></constructor-arg>
+</bean>
+
+스피링에 빈으로 등록하기 (root-context3.xml)
+
+<context:component-scan base-package="org.zerock.persistence">
+</context:component-scan>
+
+구현 클래스 작성하기
+ex00\src\main\java\org\zerock\persistence\MemberDAOImpl.java
+
+테스트 코드의 작성
+src\test\java\org\zerock\web\MemberDAOTest.java
+
+mybatis 의 log 를 위한 pom.xml 추가
+
+<dependency>
+  <groupId>org.bgee.log4jdbc-log4j2</groupId>
+  <artifactId>log4jdbc-log4j2-jdbc4</artifactId>
+  <version>1.16</version>
+</dependency>
+
+로그관련 설정 위해서 아래의 파일 추가
+\src\main\resources\log4jdbc.log4j2.properties
+ex00\src\main\resources\logback.xml
+
+was 없이 테스트 가능하게 pom 에 추가
+<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+
+
+src\test\java\org\zerock\web\MemberDAOTest.java 로 테스트 해보기
+select * from TBL_MEMBER;  
+  
+  
+  
+********************** part 2 , 기본적인 기능의 게시물 관리 (기본적인 CRUD 와 검색처리 기능 ) ******************
+
+ex01) org.zerock.controller -> project 생성 해야한다. 
+하지만 기본적인 설정의 ex00과 같기 때문에 복사해서 사용한다.
+
+- 테이블 생성작업
+
+CREATE TABLE tbl_board (   
+    bno INT NOT NULL AUTO_INCREMENT, 
+    title VARCHAR(200) NOT NULL, 
+    content TEXT, 
+    writer VARCHAR(50) NOT NULL,  
+    regdate TIMESTAMP NOT NULL DEFAULT now(), 
+    viewcnt INT DEFAULT 0 ,     
+    PRIMARY KEY (bno)
+    );
+  
+   select * from tbl_board; 
+   
+   
+  - 스프링의 UTF-8 처리 필터 등록하기 (web.xml)
+  
+  <filter>
+	  <filter-name>encoding</filter-name>
+	  <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+	  <init-param>
+	   <param-name>encoding</param-name>
+	   <param-value>UTF-8</param-value>
+	  </init-param>
+	</filter>
+	
+	<filter-mapping>
+	  <filter-name>encoding</filter-name>
+	  <url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	
+  - bootStrap 를 사용하기 위해서 폴더들을 복사해 준다.
+  
+  bootstrap , dist, plugins , include 폴더를 필요한 위치에복사 
+  home 를 수정한다. (home)이 기본 페이지로 설정돼 있기 때문..
+  
+  http://localhost:8080/ 를 통해서 boostrap 화면 나오는지 확인
+  
+  
+  
+  ------------ 영속 계층 , 비즈니스 계층 구현
+  
+  - org.zerock.domain , org.zerock.service 패키지 복사 (vo 객체 등등..)
+  
+  - root-context.xml 에 scan 추가
+   
+  <context:component-scan
+		base-package="org.zerock.service">
+	</context:component-scan>
+  
+  - boardMapper.xml 쿼리 추가
+  
+  - BoardDAOTest 를 통해서 테스트 해본다.
+  
+  - mybatis-config.xml 에 typeAliases 적용 하면 간편하게 resultType 를 가지고 올수 있다.
+  
+  <typeAliases>
+    <package name="org.zerock.domain"/>    
+  </typeAliases>
+  
+  ------------ 실직적인 등록 구현 
+  
+  - org.zerock.controller 패키지 복사 (controller 등등 ..)
+  
+   - board 폴더를 views 에 복사 한다. (jsp 필요 파일들)
+   
+   - tomcat 을 통해 /board/register 를 호출해본다. (get 방식)
+   
+    register.jsp 에서 form 의 action 이 지정되지 않았으며 , 속성또한 post 가 아니다. 
+	이럴때는 현재의 경로를 그대로 action 의 대상 경로로 잡게 된다.
+	
+	등록이 완료되면 , success.jsp 로 자동 이동된다.
+	이때 새로고침을 통해 post 방식이 다시 호출 될수 있으므로 controller 에서 redirect 설정을 해준다.
+   
+   - listAll.jsp 테스트 한다.
+   <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
+   를 추가해서 , JSTL 을 사용할수 있도록 한다.
+   
+   - read.jsp , 삭제처리 , 수정처리까지(modify.jsp) 완료한다.
+   
+   
+   ------------ 예외 처리
+   
+  @ExceptionHandler 을 통해서 예외처리를 한다.
+  CommonExceptionAdvice.java , error_common.jsp 에 예외처리를 하면된다.
+
+
+   
+   ------------ 페이징 처리   
+	
+   충분한 양의 데이터 넣기 : insert .. 해서 데이터를 넣는다.
+   insert into tbl_board(title, content, writer)
+   (select title,content,writer from tbl_board);
+
+   http://localhost:8080/board/listPage 로 테스트 하기
+   
+   
+	------------ 검색처리와 동적 SQL (이후부터는 sboard 를 통해 진행된다.)
+   
+   SearchCriteria.java 를 추가한다. (Criteria 상속)
+   SearchBoardController.java 추가
+   views 에 sboard 폴더추가
+   
+   encoding 처리를 해줘야 한다. jsp (encodeURIComponent) , java (PageMaker, URLEncoder.encode(keyword,"UTF-8"))
+   
+   
+   
+  
+   ********************** part 3 "ajax 댓글 처리"  , Rest방식의 이해, Ajax 방식의 이해, json 데이터처리 , handlebars 를 이용한 템플릿 처리 ******************
+   ---------- ex02 -------
+   
+    - JSON 사용하려면 pom.xml 에 추가
+	<!-- json 라이브러리 -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.8.4</version>
+		</dependency>
+  
+  - SampleController.java , SampleVO.java 를 추가해서 테스트를 해본다.
+   @RestController 를 사용하면 , 응답을 문자열 또는 json 으로 할 수 있다.
+   
+   http://localhost:8080/sample/hello -> 문자열
+   http://localhost:8080/sample/sendVO -> json
+   http://localhost:8080/sample/sendList -> list 
+   
+   
+   - Rest client 설치
+   https://chrome.google.com/webstore
+   Advanced REST client 설치 
+   
+   - 댓글을 위한 테이블 생성
+   
+   CREATE TABLE tbl_reply (   
+    rno int NOT NULL AUTO_INCREMENT, 
+    bno int NOT NULL DEFAULT 0, 
+    replytext varchar(1000) NOT NULL,
+    replyer varchar(50)  NOT NULL,
+    regdate TIMESTAMP NOT NULL DEFAULT now(), 
+    updatedate TIMESTAMP NOT NULL DEFAULT now(), 
+    PRIMARY KEY (rno)
+    );
+	
+	ALTER TABLE tbl_reply ADD CONSTRAINT fK_board FOREIGN KEY(bno)
+	REFERENCES tbl_board(bno);
+	
+	- 댓글을 위한 vo , dao , mapper 등등 생성
+	ReplyVO.java , ReplyDAO.java , replyMapper.xml , ReplyDAOImpl.java , ReplyService.java , ReplyServiceImpl.java , ReplyController.java
+	
+	- Advanced REST client 로 등록 테스트
+	http://localhost:8080/replies (post)
+	headers : Content-Type application/json
+    {"bno":"49142","replyer":"testUser","replytext":"테스트댓글1"}
+	{"bno":"49142","replyer":"testUser","replytext":"테스트댓글2"}
+
+	
+	- Advanced REST client 전체 댓글 불러오는지 테스트한다.
+	http://localhost:8080/replies/all/49142 (get)
+
+	- Advanced REST client 수정 테스트한다.
+	http://localhost:8080/replies/2 (petch , put)
+	{"replytext":"수정된 댓글 추가"}
+	
+	- 브라우저의 종류에 따라서 , PUT , PATCH , DELETE 같은 방식을 지원하지 않는경우도 있다.
+	그런 상황의 고려를 위해서 web.xml 에 아래의 내용을 추가한다.
+	
+	<filter>
+		<filter-name>hiddenHttpMethodFilter</filter-name>
+		<filter-class>org.springframework.web.filter.HiddenHttpMethodFilter</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>hiddenHttpMethodFilter</filter-name>
+		<url-pattern>/*</url-pattern>
+	</filter-mapping>
+	
+	설정 후 에는 POST 방식으로 진행하고 , method 를 추가한 상태에서 진행하면 된다.
+	
+	
+	- Advanced REST client 삭제처리 테스트한다.
+	http://localhost:8080/replies/2 (delete)
+	
+	
+	-------- 화면에서의 Ajax 호출 -------------------------
+	
+	- 테스트를 위해서 HomeController.java 에 아래와 같이 추가해준다.
+
+	@RequestMapping(value = "/test", method = RequestMethod.GET)
+		public void ajaxTest() {
+	}
+	
+	
+	- test.jsp 추가
+	http://localhost:8080/test
+	CRUD 를 테스트 해본다. 
+
+	
+	-------- 게시물 관리의 댓글 적용 -------------------------
+
+	- readPage.jsp 수정한다. 
+
+	- handlebars 사용 연습
+	http://localhost:8080/resources/ex00.html
+	http://localhost:8080/resources/ex01.html
+	http://localhost:8080/resources/ex02.html
+
+
+    - 실제 화면에서 댓글을 테스트 해본다.
+
+	http://localhost:8080/sboard/list
+	
+	
+	********************** part4 AOP 와 트랜잭션 처리 (ex03) *****************
+   
+   - pom 에 추가
+   
+   <dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-aop</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+		
+	<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-tx</artifactId>
+			<version>${org.springframework-version}</version>
+		</dependency>
+
+	<dependency>
+			<groupId>org.aspectj</groupId>
+			<artifactId>aspectjtools</artifactId>
+			<version>${org.aspectj-version}</version>
+		</dependency>
+
+	- root-context.xml 에 Namespace 에 tx 체크해준다. 아래의 내용도 추가해 준다.
+
+	<aop:aspectj-autoproxy></aop:aspectj-autoproxy>
+
+	<context:component-scan base-package="org.zerock.aop"></context:component-scan>
+
+	<aop:config>
+	</aop:config>	
+
+	
+	- 샘플용 테이블 설계
+    
+create table tbl_user (
+uid varchar(50) NOT NULL,
+upw varchar(50) NOT NULL,
+uname varchar(100) NOT NULL,
+upoint int NOT NULL DEFAULT 0,
+primary key(uid)
+);
+
+
+insert into tbl_user(uid, upw, uname) values ('user00','user00','IRON MAN');
+insert into tbl_user(uid, upw, uname) values ('user01','user01','CAPTAIN');
+insert into tbl_user(uid, upw, uname) values ('user02','user02','HULK');
+insert into tbl_user(uid, upw, uname) values ('user03','user03','Thor');
+insert into tbl_user(uid, upw, uname) values ('user10','user10','Quick Silver');
+
+
+create table tbl_message (
+mid int not null auto_increment,
+targetid varchar(50) not null,
+sender varchar(50) not null,
+message text not null,
+opendate timestamp,
+senddate timestamp not null default now(),
+primary key(mid)
+);
+
+alter table tbl_message add constraint fk_usertarget
+foreign key (targetid) references tbl_user (uid);
+
+alter table tbl_message add constraint fk_usersender
+foreign key (sender) references tbl_user (uid);	
+
+
+	- dao , xml , 서비스 생성
+	
+	MessageVO.java , UserVO.java , MessageDAO.java , MessageDAOImpl.java , messageMapper.xml
+	
+	PointDAO.java , PointDAOImpl.java , pointMapper.xml , MessageService.java , MessageServiceImpl.java
+	
+	- AOP 연습하기 , 파일 추가
+	
+	SampleAdvice.java , MessageController.java
+	SampleAdvice.java 가 AOP 의 직접적인 역할을 한다.
+	
+	log4j.xml -> info 로 수정
+	
+	- Advanced REST client 로 테스트
+	
+	(post) http://localhost:8080/messages/
+	
+	{"targetid":"user01","sender":"user00","message":"Good Luck!"}
+
+
+
+    - Spring 트랜잭션 처리 (@Transactional 애노테이션)
+	
+	- root-context 에 추가
+	
+	<bean id="transactionManager"
+		class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property name="dataSource" ref="dataSource"></property>
+	</bean>
+
+	<tx:annotation-driven />
+	
+	- 트랜잭션 테스트는 생략한다.
+	
+	---------- 댓글 카운트의 처리 ----------------------------------
+	
+	
+	- BoardVO.java 수정 , boardMapper.xml 수정 , BoardDAO.java 수정 , ReplyDAOImpl.java 수정 , ReplyDAO.java 수정
+
+     - 쿼리 수정
+	alter table tbl_board add column replycnt int default 0 ;
+	
+	update tbl_board set replycnt = ( select count(rno) from tbl_reply where bno = tbl_board.bno) where bno >0 ;
+	
+	
+   ********************** part5 게시물의 첨부파일 기능 (ex04) , ajax 이용한 파일 업로드 , 파일 저장 및 다운로드 *****************
+	
+	
+	- 이미지를 깨끗하게 축소할수 있는 imgScalr 라이브러리 추가 (pom.xml)
+	<dependency>
+			<groupId>commons-fileupload</groupId>
+			<artifactId>commons-fileupload</artifactId>
+			<version>1.3.2</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.imgscalr</groupId>
+			<artifactId>imgscalr-lib</artifactId>
+			<version>4.2</version>
+		</dependency>
+		
+	- servlet-context.xml 에 설정추가 , 빈등록과 크기제한
+	
+	<beans:bean id="multipartResolver"
+		class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+		<beans:property name="maxUploadSize" value="10485760"></beans:property>
+	</beans:bean>
+
+  <beans:bean id="uploadPath" class="java.lang.String">
+    <beans:constructor-arg value="C:\\spring_file\\upload">
+    </beans:constructor-arg>
+	
+	
+	- 일반적인 파일 업로드 이해하기 (테스트)
+	
+	UploadController.java 추가 , uploadForm.jsp 
+	
+	http://localhost:8080/uploadForm
+	
+	만약 한글이름이 깨진다면 , web.xml 에 UTF-8 encoding 설정을 해줘야 한다.
+	
+	iframe 을 사용하면 , 화면의 전환을 피할수 있다. iframe 부분만 전환
+  
+	- Ajax 방식의 파일 업로드 , drag & drop 방식을 사용한다. 다중도 가능하지만 예제에서는 단일 파일 업로드를 기준으로 한다.
+	
+	http://localhost:8080/uploadAjax
+	
+	-------- 게시물 등록의 파일 업로드 ----------------
+	
+	- 테이블 만들기
+	
+	CREATE TABLE tbl_attach (   
+    fullname VARCHAR(150) NOT NULL,  
+    bno INT NOT NULL,
+    regdate timestamp DEFAULT now(),     
+	primary key(fullname)
+    );
+	
+	ALTER TABLE tbl_attach ADD CONSTRAINT fK_board_attach FOREIGN KEY(bno)
+    REFERENCES tbl_board(bno);
+	
+	- vo , dao , mapper , service 수정
+	
+	BoardDAO.java , BoardDAO.java , BoardDAOImpl.java , BoardService.java , BoardServiceImpl.java , SearchBoardController.java
+	
+	register.jsp , upload.js , readPage.jsp
+	
+	***** 참부파일의 추가 와 조회 가능하지만 ,  삭제 , 수정은 구현돼 있지 않다.
+	
+	
+	
+	********************** part6 interceptor 를 이용한 로그인 처리 *****************
+	
+	- filter 와 interceptor 의 차이는 스프링에서 관리되는 모든 객체에 접근이 가능하다는 것 이다.
+	
+		AOP 와 interceptor 의 차이는 파라미터의 차이다. 
+	
+	- org.zerock.interceptor 패키지를 생성한다.
+	
+	- servlet-context.xml 에 인터셉터 설정 (테스트용)
+	
+	<beans:bean id="sampleInterceptor" class="org.zerock.interceptor.SampleInterceptor"></beans:bean>
+  <interceptors>
+  <interceptor> 
+  <mapping path="/doA"/> 
+  <mapping path="/doB"/> 
+  <beans:ref bean="sampleInterceptor"/> 
+  </interceptor> 
+  </interceptors>
+  
+	- HomeController.java  , SampleInterceptor.java , home.jsp -----  테스트용으로 추가 , 수정
+	
+	- 테스트를 하면서 log를 확인해 본다. 
+	
+	http://localhost:8080/doA
+  
+    preHandle 가 먼저 호출되고, 메소드 동작 후 postHandle 가 작동한다.
+   
+	- request, response 활용한 interceptor 테스트 
+	
+	http://localhost:8080/doB
+	
+	기존의 home.jsp 는 session=false 로 설정 돼 있기 때문에 , 제거 후 테스트 해본다. 
+	
+	-------------- httpsession 을 이용하는 로그인 처리 ----------------
+	
+	
+	- LoginDTO.java 추가
+	
+	vo 는 보통 테이블과 같이 설계하고 , dto 는 화면에 가깝게 설계 한다.
+	
+	- 파일 추가
+	
+	UserDAO.java
+	UserDAOImpl.java
+	userMapper.xml
+	UserService.java
+	UserServiceImpl.java
+	UserController.java
+	LoginInterceptor.java
+	AuthInterceptor.java
+	login.jsp
+	loginPost.jsp
+
+	- servlet-context 수정 
+	
+	 <beans:bean id="sampleInterceptor" class="org.zerock.interceptor.SampleInterceptor"></beans:bean>
+	<beans:bean id="authInterceptor" class="org.zerock.interceptor.AuthInterceptor"></beans:bean>
+	<beans:bean id="loginInterceptor" class="org.zerock.interceptor.LoginInterceptor"></beans:bean>
+	<interceptors>
+		<interceptor>
+			<mapping path="/user/loginPost" />
+			<beans:ref bean="loginInterceptor" />
+		</interceptor>
+ 	  <interceptor>
+	    <mapping path="/sboard/register"/>
+	    <mapping path="/sboard/modifyPage"/>
+	    <mapping path="/sboard/removePage"/>
+	    <beans:ref bean="authInterceptor"/>
+	  </interceptor>	
+	</interceptors>
+  	
+   - 로그인에 맞게 파일 수정
+   
+   register.jsp
+   readPage.jsp
+   
+   - 테이블 변경
+   
+   alter table tbl_user add column
+   sessionkey varchar(50) not null default 'none';
+   
+   alter table tbl_user
+   add column sessionlimit timestamp;
+
+   - logout 테스트
+	http://localhost:8080/user/logout 
+   
+	- 자동로그인 테스트 
+	쿠키를 이용해 7일간 자동로그인이 돼도록 설정한다.
+
+	user01 , user02 테스트 아이디 
+
+   - 정리 : 세션폭탄에 대한 대비는 돼있지 않으며 , 스프링 시튜리티 와 암호화는 적용 되지 않았다 . 
+   자동로그인이 어떤식으로 구현되는지만 보여주기 위해 작성된 코드이다.
+   
+   
+  
+
