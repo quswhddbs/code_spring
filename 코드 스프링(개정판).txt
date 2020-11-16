@@ -1154,6 +1154,42 @@ CommonController.java
 customLogout.jsp
 admin.jsp 페이지에 logout 추가해서 테스트 
 
+---- JDBC 를 이용하는 간편 인증/권한처리 
+이번 예제는 기존에 데이터베이스가 존재하는 상황에서 mybatis 나 기타 프레임워크 없이 사용하는 방법을 익힌다. 
+security-context.xml 에는 기존의 <security:user-service> 는 변경된다.
+
+- JDBC 를 이용하기 위한 테이블 설정
+create table users(
+      username varchar2(50) not null primary key,
+      password varchar2(50) not null,
+      enabled char(1) default '1');
+?
+      
+ create table authorities (
+      username varchar2(50) not null,
+      authority varchar2(50) not null,
+      constraint fk_authorities_users foreign key(username) references users(username));
+      
+ create unique index ix_auth_username on authorities (username,authority);
+?
+?
+insert into users (username, password) values ('user00','pw00');
+insert into users (username, password) values ('member00','pw00');
+insert into users (username, password) values ('admin00','pw00');
+?
+insert into authorities (username, authority) values ('user00','ROLE_USER');
+insert into authorities (username, authority) values ('member00','ROLE_MANAGER'); 
+insert into authorities (username, authority) values ('admin00','ROLE_MANAGER'); 
+insert into authorities (username, authority) values ('admin00','ROLE_ADMIN');
+commit;
+
+- password Encoder 문제 해결 
+5버전부터는 변경된 부분이 있다. Deprecated 사용 못함 
+패키지에 
+CustomNoOpPasswordEncoder.java
+security-context 에 CustomNoOpPasswordEncoder 클래스 빈으로 등록 
+<security:password-encoder ref="customPasswordEncoder" />
+
 
 
 
