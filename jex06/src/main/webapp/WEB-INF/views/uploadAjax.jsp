@@ -343,7 +343,7 @@
        
        var fileLink = fileCallPath.replace(new RegExp(/\\/g),"/");
        
-       str += "<li><div><a href='/download?fileName="+fileCallPath+"'>"+ 
+       str += "<li><div><a href='/download?fileName="+fileCallPath+"'>"+
            "<img src='/resources/img/attach.png'>"+obj.fileName+"</a>"+
            "<span data-file=\'"+fileCallPath+"\' data-type='file'> x </span>"+
            "<div></li>"
@@ -360,11 +360,6 @@
               "<img src='display?fileName="+fileCallPath+"'></a>"+
               "<span data-file=\'"+fileCallPath+"\' data-type='image'> x </span>"+
               "<li>";
-
-      		
-       console.log('str: '+str);
-       console.log('originPath: '+originPath);
-       
      }
    });
    

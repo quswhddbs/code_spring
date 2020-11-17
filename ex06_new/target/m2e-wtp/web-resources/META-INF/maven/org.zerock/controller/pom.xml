@@ -66,6 +66,16 @@
 			<version>${org.slf4j-version}</version>
 			<scope>runtime</scope>
 		</dependency>
+		
+		<!--  
+		<dependency>
+		<groupId>log4j</groupId>
+		<artifactId>log4j</artifactId>
+		<version>1.2.17</version>
+		</dependency>
+		-->
+		
+		
 		<dependency>
 			<groupId>log4j</groupId>
 			<artifactId>log4j</artifactId>
@@ -88,8 +98,9 @@
 					<artifactId>jmxri</artifactId>
 				</exclusion>
 			</exclusions>
-			<!--  <scope>runtime</scope> -->
+			<!--  <scope>runtime</scope> -->	
 		</dependency>
+
 
 		<!-- @Inject -->
 		<dependency>
