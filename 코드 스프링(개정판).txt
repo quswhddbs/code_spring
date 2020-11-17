@@ -1309,6 +1309,67 @@ security 를 네임스페이스에 추가
 - java 설정같은 경우는 위 파일과 상응하는 servletConfig 에 내용을 추가한다. 
 @EnableGlobalMethodSecurity(prePostEnabled=true, securedEnabled=true)
 
+------------ 기존 프로젝트에 스플이 시큐리티 접목하기 ----------
+- 로그인 페이지 처리 
+기존의 login.html 과 만들어놓은 customLogin.jsp 를 머지해서 사용한다. 
+security-context.xml 와 securityConfig 의 설정을 변경하고 , 
+BoardController 에 시큐리티관련 어노테이션 설정을 한다. 
+
+- 게시물 작성 시 로그인한 사용자의 아이디 출력 , CSFR 토큰 설정 
+register.jsp
+
+- 스프링 시큐리티 한글 처리 
+시큐리티 적용후 한글이 깨지는 현상이 발생할수 있다. 
+한글 처리는 web.xml 이용해서 스프링의 CharacterEncodingFiler 를 이용하지만 , 
+시큐리티를 필터로 적용할 때에는 필터의 순서를 주의해서 설정해야 한다. 
+web.xml 에서 필터의 순서가 바뀌는 경우에는 게시물 작성 시에 한글이 깨져서 BoardController 에 전달 된다. 
+
+- 게시물 조회와 로그인 처리 
+get.jsp : 로그인한 사용자만 수정/삭제 작업을 살수 있는 기능을 활성화 한다. 
+
+- 조회화면에서 댓글 추가 버튼 
+get.jsp : 로그인한 사용자만이 조회화면에서 댓글을 추가할수 있으므로 , <sec:authrize> 를 활용 
+
+- 게시물의 수정 삭제 
+사용자가 url 을 조작해서 접근이 가능하기 때문에 화면과 post 방식으로 처리되는 부분에 
+CSRF 토큰과 스프링 시큐리티를 적용한다. 
+게시물의 수정삭제에서 과거에는 인터셉터로 처리했지만 , @PreAuthorize 의 경우에는 표현식으로 처리가능하다.
+
+- 프라우저 화면에서의 설정 
+modify.jsp 상단에 태그 라이브러리 추가 및 CSRF 토큰 추가한다. 
+BoardController 에서의 제어 @PreAuthorize 어노테이션 참조
+
+- Ajax 와 스프링 시큐리티 처리 
+스프링 시큐리티가 적용되면 post,put,patch,delete 와 같은 방식으로 데이터를 전송하는 경우에는 
+반드시 추가적으로 X-CSRF-TOKEN 과 같은 헤더 정보를 추가해서 CSRF 토큰값을 전달해야한다. 
+
+- 게시물 등록 시 첨부파일의 처리 
+register.jsp 참조 
+UploadController.java 수정 
+
+-댓글 기능의 ajax 
+get.jsp 참조 
+ReplyController.java 수정 
+
+- 댓글 삭제 
+get.jsp 참조 
+reply.js 수정 
+
+
+---- 로그아웃 처리 
+로그인 페이지의 링크는 includes 폴더 내에 header.jsp 에 정의외어 있다. 
+header.jsp 를 수정해서 스프링 시큐리티를 이용하도록 하고 ,로그인한 상태에서는 로그아웃 페이지(/customLogout)로 이동한다.
+customLogout.jsp
+
+- 로그인 후 /board/list 로 이동하기 
+home.jsp 수정 
+
+************** 전체적으로 허술하거나 수정해야 할 화면에서의 부분들은 많지만 , 기능을 이해하는대서 마무리 한다.  *****************
+http://localhost:8080/customLogin 로그인 부터 하고 , 글쓰기및 다른 부분을 테스트 한다. 
+
+
+
+
 
 
 
