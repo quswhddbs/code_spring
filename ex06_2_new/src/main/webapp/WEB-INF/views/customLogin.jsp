@@ -2,6 +2,7 @@
 	pageEncoding="UTF-8"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt"%>
+<%@ taglib uri="http://www.springframework.org/security/tags" prefix="sec" %>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -68,7 +69,21 @@
 							<input type="hidden" name="${_csrf.parameterName}"
 								value="${_csrf.token}" />
 						</form>
-
+						
+						<font color="red">
+						<p><c:out value="${error}"/></p>
+						</font>
+						
+						<!-- 
+						<c:if test="${not empty SPRING_SECURITY_LAST_EXCEPTION}">
+    					<font color="red">
+        				<p>Your login attempt was not successful due to <br/>
+            			${sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message}</p>
+        				<c:remove var="SPRING_SECURITY_LAST_EXCEPTION" scope="session"/>
+    					</font>
+						</c:if>
+ 						-->
+ 						
 					</div>
 				</div>
 			</div>
@@ -89,9 +104,6 @@
 	<!-- Custom Theme JavaScript -->
 	<script src="/resources/dist/js/sb-admin-2.js"></script>
   <script>
-  
-  
-  
   
   $(".btn-success").on("click", function(e){
     

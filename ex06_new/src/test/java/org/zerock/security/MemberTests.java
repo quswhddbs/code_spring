@@ -29,6 +29,41 @@ public class MemberTests {
   @Setter(onMethod_ = @Autowired)
   private DataSource ds;
   
+@Test
+public void testInsertMember() {
+
+	/*
+	 
+	 기존 쿼리 수정 
+	 
+	update tbl_member_auth 
+	set auth = 'GENERAL'
+	insert into tbl_member_auth( userid , auth)
+	values('admin','ADMIN' )
+	*/
+	
+	
+  String sql = "insert into tbl_member(userid, userpw, username) values (?,?,?)";
+  
+    Connection con = null;
+    PreparedStatement pstmt = null;
+    
+    try {
+      
+      con = ds.getConnection();
+      pstmt = con.prepareStatement(sql);
+      pstmt.setString(1, "admin");
+      pstmt.setString(2, pwencoder.encode("admin"));
+      pstmt.setString(3,"관리자");
+      pstmt.executeUpdate();
+    }catch(Exception e) {
+      e.printStackTrace();
+    }finally {
+      if(pstmt != null) { try { pstmt.close();  } catch(Exception e) {} }
+      if(con != null) { try { con.close();  } catch(Exception e) {} }
+    }
+}
+  
 //  @Test
 //  public void testInsertMember() {
 //
@@ -74,50 +109,50 @@ public class MemberTests {
 //    }//end for
 //  }
   
-  @Test
-  public void testInsertAuth() {
-    
-    
-    String sql = "insert into tbl_member_auth (userid, auth) values (?,?)";
-    
-    for(int i = 0; i < 100; i++) {
-      
-      Connection con = null;
-      PreparedStatement pstmt = null;
-      
-      try {
-        con = ds.getConnection();
-        pstmt = con.prepareStatement(sql);
-      
-        
-        if(i <80) {
-          
-          pstmt.setString(1, "user"+i);
-          pstmt.setString(2,"ROLE_USER");
-          
-        }else if (i <90) {
-          
-          pstmt.setString(1, "manager"+i);
-          pstmt.setString(2,"ROLE_MEMBER");
-          
-        }else {
-          
-          pstmt.setString(1, "admin"+i);
-          pstmt.setString(2,"ROLE_ADMIN");
-          
-        }
-        
-        pstmt.executeUpdate();
-        
-      }catch(Exception e) {
-        e.printStackTrace();
-      }finally {
-        if(pstmt != null) { try { pstmt.close();  } catch(Exception e) {} }
-        if(con != null) { try { con.close();  } catch(Exception e) {} }
-        
-      }
-    }//end for
-  }
+//  @Test
+//  public void testInsertAuth() {
+//    
+//    
+//    String sql = "insert into tbl_member_auth (userid, auth) values (?,?)";
+//    
+//    for(int i = 0; i < 100; i++) {
+//      
+//      Connection con = null;
+//      PreparedStatement pstmt = null;
+//      
+//      try {
+//        con = ds.getConnection();
+//        pstmt = con.prepareStatement(sql);
+//      
+//        
+//        if(i <80) {
+//          
+//          pstmt.setString(1, "user"+i);
+//          pstmt.setString(2,"ROLE_USER");
+//          
+//        }else if (i <90) {
+//          
+//          pstmt.setString(1, "manager"+i);
+//          pstmt.setString(2,"ROLE_MEMBER");
+//          
+//        }else {
+//          
+//          pstmt.setString(1, "admin"+i);
+//          pstmt.setString(2,"ROLE_ADMIN");
+//          
+//        }
+//        
+//        pstmt.executeUpdate();
+//        
+//      }catch(Exception e) {
+//        e.printStackTrace();
+//      }finally {
+//        if(pstmt != null) { try { pstmt.close();  } catch(Exception e) {} }
+//        if(con != null) { try { con.close();  } catch(Exception e) {} }
+//        
+//      }
+//    }//end for
+//  }
 
   
 }
